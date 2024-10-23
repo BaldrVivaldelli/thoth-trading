@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Propiedades para configuración -->
+    <property name="TEST_LOG_PATH" value="logs/test"/>
+    <property name="PATTERN_CONSOLE"
+              value="%d{HH:mm:ss.SSS} [%-16thread] %-5level %-30logger{30} - %msg%n"/>
+    <property name="PATTERN_FILE"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
+
+    <!-- Appender para consola -->
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${PATTERN_CONSOLE}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Appender para archivo de test general -->
+    <appender name="TestFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${TEST_LOG_PATH}/test.log</file>
+        <encoder>
+            <pattern>${PATTERN_FILE}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${TEST_LOG_PATH}/archive/test-%d{yyyy-MM-dd}-%i.log.gz</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>5</maxHistory>
+            <totalSizeCap>50MB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Appender específico para OrderBook -->
+    <appender name="OrderBookFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${TEST_LOG_PATH}/orderbook.log</file>
+        <encoder>
+            <pattern>${PATTERN_FILE}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${TEST_LOG_PATH}/archive/orderbook-%d{yyyy-MM-dd}-%i.log.gz</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>5</maxHistory>
+            <totalSizeCap>50MB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Appender asíncrono para mejorar performance -->
+    <appender name="AsyncOrderBook" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="OrderBookFile"/>
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
+    </appender>
+
+    <!-- Logger específico para OrderBook -->
+    <logger name="com.aaa.thoth.engine.OrderBook" level="DEBUG" additivity="false">
+        <appender-ref ref="Console"/>
+        <appender-ref ref="AsyncOrderBook"/>
+    </logger>
+
+    <!-- Logger para el engine -->
+    <logger name="com.aaa.thoth.engine" level="DEBUG" additivity="false">
+        <appender-ref ref="Console"/>
+        <appender-ref ref="TestFile"/>
+    </logger>
+
+    <!-- Logger para el core -->
+    <logger name="com.aaa.thoth.core" level="DEBUG" additivity="false">
+        <appender-ref ref="Console"/>
+        <appender-ref ref="TestFile"/>
+    </logger>
+
+    <!-- Root logger -->
+    <root level="INFO">
+        <appender-ref ref="Console"/>
+        <appender-ref ref="TestFile"/>
+    </root>
+
+    <!-- Logger específico para tests -->
+    <logger name="com.aaa.thoth.engine.OrderBookTest" level="DEBUG" additivity="false">
+        <appender-ref ref="Console"/>
+        <appender-ref ref="TestFile"/>
+    </logger>
+
+    <logger name="com.aaa.thoth.core.OrderTest" level="DEBUG" additivity="false">
+        <appender-ref ref="Console"/>
+        <appender-ref ref="TestFile"/>
+    </logger>
+
+    <logger name="com.aaa.thoth.core.TradeTest" level="DEBUG" additivity="false">
+        <appender-ref ref="Console"/>
+        <appender-ref ref="TestFile"/>
+    </logger>
+
+</configuration>

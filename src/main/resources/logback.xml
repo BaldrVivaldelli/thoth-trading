@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="LOG_PATH" value="logs"/>
+    <property name="LOG_ARCHIVE" value="${LOG_PATH}/archive"/>
+
+    <!-- Patrón para logs -->
+    <property name="PATTERN_CONSOLE"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
+
+    <property name="PATTERN_FILE"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS}|%-5level|%thread|%logger{36}|%msg%n"/>
+
+    <!-- Appender para consola -->
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${PATTERN_CONSOLE}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Appender para log principal -->
+    <appender name="TradingEngine" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/trading-engine.log</file>
+        <encoder>
+            <pattern>${PATTERN_FILE}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_ARCHIVE}/trading-engine-%d{yyyy-MM-dd}-%i.log.gz</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Appender específico para trades -->
+    <appender name="Trades" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/trades.log</file>
+        <encoder>
+            <pattern>${PATTERN_FILE}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_ARCHIVE}/trades-%d{yyyy-MM-dd}-%i.log.gz</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>5GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Appender para errores -->
+    <appender name="Errors" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/errors.log</file>
+        <encoder>
+            <pattern>${PATTERN_FILE}</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_ARCHIVE}/errors-%d{yyyy-MM-dd}-%i.log.gz</fileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>60</maxHistory>
+            <totalSizeCap>2GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Appender asíncrono para mejor performance -->
+    <appender name="Async-TradingEngine" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="TradingEngine"/>
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
+        <neverBlock>true</neverBlock>
+    </appender>
+
+    <appender name="Async-Trades" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="Trades"/>
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
+        <neverBlock>true</neverBlock>
+    </appender>
+
+    <!-- Logger específico para trades -->
+    <logger name="com.aaa.thoth.core.Trade" level="INFO" additivity="false">
+        <appender-ref ref="Async-Trades"/>
+        <appender-ref ref="Console"/>
+    </logger>
+
+    <!-- Logger para el motor de trading -->
+    <logger name="com.aaa.thoth.engine" level="INFO" additivity="false">
+        <appender-ref ref="Async-TradingEngine"/>
+        <appender-ref ref="Console"/>
+        <appender-ref ref="Errors"/>
+    </logger>
+
+    <!-- Logger para validación de órdenes -->
+    <logger name="com.aaa.thoth.engine.OrderValidator" level="INFO" additivity="false">
+        <appender-ref ref="Async-TradingEngine"/>
+        <appender-ref ref="Console"/>
+        <appender-ref ref="Errors"/>
+    </logger>
+
+    <!-- Logger para gestión de riesgos -->
+    <logger name="com.aaa.thoth.engine.RiskManager" level="INFO" additivity="false">
+        <appender-ref ref="Async-TradingEngine"/>
+        <appender-ref ref="Console"/>
+        <appender-ref ref="Errors"/>
+    </logger>
+
+    <!-- Root logger -->
+    <root level="INFO">
+        <appender-ref ref="Console"/>
+        <appender-ref ref="Async-TradingEngine"/>
+        <appender-ref ref="Errors"/>
+    </root>
+
+</configuration>
