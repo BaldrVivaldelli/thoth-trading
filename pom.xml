@@ -12,6 +12,13 @@
         Sistema de negociación bursátil de alto rendimiento.
         Nombrado en honor a Thoth, dios egipcio de la sabiduría, el conocimiento y los cálculos precisos.
     </description>
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <properties>
         <java.version>21</java.version>
