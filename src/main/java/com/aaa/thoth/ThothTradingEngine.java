@@ -63,8 +63,8 @@ public class ThothTradingEngine {
         CompletableFuture<Order> sellResult = tradingEngine.submitOrder(sellOrder);
 
         // Esperar y mostrar resultados
-        Order processedBuyOrder = buyResult.get();
-        Order processedSellOrder = sellResult.get();
+        Order processedBuyOrder = buyResult.join();
+        Order processedSellOrder = sellResult.join();
 
         logger.info("Resultado orden de compra: {}", processedBuyOrder);
         logger.info("Resultado orden de venta: {}", processedSellOrder);
